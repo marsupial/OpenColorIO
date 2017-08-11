@@ -92,10 +92,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <pthread.h>
 // OS for spinlock
 #ifdef __APPLE__
-#if MACOSX_DEPLOYMENT_TARGET >= MACOSX_DEPLOYMENT_TARGET_10_12
-#define OCIO_MACOS_UNFAIR_LOCK
-#endif
-#ifdef OCIO_MACOS_UNFAIR_LOCK
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_12
 #include <os/lock.h>
 #else
 #include <libkern/OSAtomic.h>
@@ -103,7 +100,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <sys/types.h>
 #endif
 #endif
-
 // general includes
 #include <stdio.h>
 #include <math.h>
@@ -175,11 +171,11 @@ OCIO_NAMESPACE_ENTER
 #if __APPLE__
     class _SpinLock {
     public:
-#ifdef OCIO_MACOS_UNFAIR_LOCK
-	_SpinLock()   { _spinlock = OS_UNFAIR_LOCK_INIT; }
+#if MAC_OS_X_VERSION_MIN_REQUIRED > MAC_OS_X_VERSION_10_12
+    _SpinLock()   { _spinlock = OS_UNFAIR_LOCK_INIT; }
     ~_SpinLock()  { }
-	void lock()   { os_unfair_lock_lock(&_spinlock); }
-	void unlock() { os_unfair_lock_unlock(&_spinlock); }
+    void lock()   { os_unfair_lock_lock(&_spinlock); }
+    void unlock() { os_unfair_lock_unlock(&_spinlock); }
     private:
     os_unfair_lock _spinlock;
 #else
